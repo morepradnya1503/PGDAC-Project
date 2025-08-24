@@ -1,0 +1,252 @@
+package com.yourcompany.ems.config;
+
+import com.yourcompany.ems.entity.Employee;
+import com.yourcompany.ems.entity.Project;
+import com.yourcompany.ems.entity.Role;
+import com.yourcompany.ems.entity.User;
+import com.yourcompany.ems.repository.EmployeeRepository;
+import com.yourcompany.ems.repository.ProjectRepository;
+import com.yourcompany.ems.repository.RoleRepository;
+import com.yourcompany.ems.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
+
+import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
+
+@Component
+public class DataInitializer implements CommandLineRunner {
+
+    @Autowired
+    private RoleRepository roleRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private EmployeeRepository employeeRepository;
+
+    @Autowired
+    private ProjectRepository projectRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Override
+    public void run(String... args) throws Exception {
+        initializeRoles();
+        initializeUsers();
+        initializeEmployees();
+        initializeProjects();
+    }
+
+    private void initializeRoles() {
+        if (roleRepository.count() == 0) {
+            Role adminRole = new Role();
+            adminRole.setName(Role.RoleType.ROLE_ADMIN);
+            roleRepository.save(adminRole);
+
+            Role hrRole = new Role();
+            hrRole.setName(Role.RoleType.ROLE_HR);
+            roleRepository.save(hrRole);
+
+            Role managerRole = new Role();
+            managerRole.setName(Role.RoleType.ROLE_MANAGER);
+            roleRepository.save(managerRole);
+
+            Role employeeRole = new Role();
+            employeeRole.setName(Role.RoleType.ROLE_EMPLOYEE);
+            roleRepository.save(employeeRole);
+        }
+    }
+
+    private void initializeUsers() {
+        if (userRepository.count() == 0) {
+            // Admin User
+            User adminUser = new User();
+            adminUser.setUsername("admin");
+            adminUser.setPassword(passwordEncoder.encode("admin123"));
+            adminUser.setEmail("admin@worksphere.com");
+            adminUser.setFirstName("Admin");
+            adminUser.setLastName("User");
+            adminUser.setEnabled(true);
+            Role adminRole = roleRepository.findByName(Role.RoleType.ROLE_ADMIN).orElse(null);
+            if (adminRole == null) {
+                System.err.println("ERROR: ROLE_ADMIN not found. Skipping admin user creation.");
+            } else {
+                adminUser.getRoles().add(adminRole);
+                userRepository.save(adminUser);
+            }
+
+            // HR User
+            User hrUser = new User();
+            hrUser.setUsername("hr");
+            hrUser.setPassword(passwordEncoder.encode("hr123"));
+            hrUser.setEmail("hr@worksphere.com");
+            hrUser.setFirstName("HR");
+            hrUser.setLastName("Manager");
+            hrUser.setEnabled(true);
+            Role hrRole = roleRepository.findByName(Role.RoleType.ROLE_HR).orElse(null);
+            if (hrRole == null) {
+                System.err.println("ERROR: ROLE_HR not found. Skipping HR user creation.");
+            } else {
+                hrUser.getRoles().add(hrRole);
+                userRepository.save(hrUser);
+            }
+
+            // Manager User
+            User managerUser = new User();
+            managerUser.setUsername("manager");
+            managerUser.setPassword(passwordEncoder.encode("manager123"));
+            managerUser.setEmail("manager@worksphere.com");
+            managerUser.setFirstName("Project");
+            managerUser.setLastName("Manager");
+            managerUser.setEnabled(true);
+            Role managerRole = roleRepository.findByName(Role.RoleType.ROLE_MANAGER).orElse(null);
+            if (managerRole == null) {
+                System.err.println("ERROR: ROLE_MANAGER not found. Skipping manager user creation.");
+            } else {
+                managerUser.getRoles().add(managerRole);
+                userRepository.save(managerUser);
+            }
+
+            // Employee User
+            User employeeUser = new User();
+            employeeUser.setUsername("employee");
+            employeeUser.setPassword(passwordEncoder.encode("employee123"));
+            employeeUser.setEmail("employee@worksphere.com");
+            employeeUser.setFirstName("John");
+            employeeUser.setLastName("Doe");
+            employeeUser.setEnabled(true);
+            Role employeeRole = roleRepository.findByName(Role.RoleType.ROLE_EMPLOYEE).orElse(null);
+            if (employeeRole == null) {
+                System.err.println("ERROR: ROLE_EMPLOYEE not found. Skipping employee user creation.");
+            } else {
+                employeeUser.getRoles().add(employeeRole);
+                userRepository.save(employeeUser);
+            }
+        }
+    }
+
+    private void initializeEmployees() {
+        if (employeeRepository.count() == 0) {
+            // Admin Employee
+            User adminUser = userRepository.findByUsername("admin").orElse(null);
+            if (adminUser == null) {
+                System.err.println("ERROR: Admin user not found. Skipping admin employee creation.");
+            } else {
+                Employee adminEmployee = new Employee();
+                adminEmployee.setUser(adminUser);
+                adminEmployee.setEmployeeId("EMP001");
+                adminEmployee.setFirstName("Admin");
+                adminEmployee.setLastName("User");
+                adminEmployee.setEmail("admin@worksphere.com");
+                adminEmployee.setContact("+1234567890");
+                adminEmployee.setAddress("123 Admin Street");
+                adminEmployee.setCity("Admin City");
+                adminEmployee.setBloodGroup("O+");
+                adminEmployee.setDateOfJoining(LocalDate.now());
+                employeeRepository.save(adminEmployee);
+            }
+
+            // HR Employee
+            User hrUser = userRepository.findByUsername("hr").orElse(null);
+            if (hrUser == null) {
+                System.err.println("ERROR: HR user not found. Skipping HR employee creation.");
+            } else {
+                Employee hrEmployee = new Employee();
+                hrEmployee.setUser(hrUser);
+                hrEmployee.setEmployeeId("EMP002");
+                hrEmployee.setFirstName("HR");
+                hrEmployee.setLastName("Manager");
+                hrEmployee.setEmail("hr@worksphere.com");
+                hrEmployee.setContact("+1234567891");
+                hrEmployee.setAddress("456 HR Avenue");
+                hrEmployee.setCity("HR City");
+                hrEmployee.setBloodGroup("A+");
+                hrEmployee.setDateOfJoining(LocalDate.now());
+                employeeRepository.save(hrEmployee);
+            }
+
+            // Manager Employee
+            User managerUser = userRepository.findByUsername("manager").orElse(null);
+            if (managerUser == null) {
+                System.err.println("ERROR: Manager user not found. Skipping manager employee creation.");
+            } else {
+                Employee managerEmployee = new Employee();
+                managerEmployee.setUser(managerUser);
+                managerEmployee.setEmployeeId("EMP003");
+                managerEmployee.setFirstName("Project");
+                managerEmployee.setLastName("Manager");
+                managerEmployee.setEmail("manager@worksphere.com");
+                managerEmployee.setContact("+1234567892");
+                managerEmployee.setAddress("789 Manager Road");
+                managerEmployee.setCity("Manager City");
+                managerEmployee.setBloodGroup("B+");
+                managerEmployee.setDateOfJoining(LocalDate.now());
+                employeeRepository.save(managerEmployee);
+            }
+
+            // Regular Employee
+            User employeeUser = userRepository.findByUsername("employee").orElse(null);
+            User managerUserForRegular = userRepository.findByUsername("manager").orElse(null);
+            if (employeeUser == null) {
+                System.err.println("ERROR: Employee user not found. Skipping regular employee creation.");
+            } else if (managerUserForRegular == null) {
+                System.err.println("ERROR: Manager user not found for regular employee. Skipping regular employee creation.");
+            } else {
+                Employee managerEmployee = employeeRepository.findByEmployeeId("EMP003").orElse(null);
+                Employee regularEmployee = new Employee();
+                regularEmployee.setUser(employeeUser);
+                regularEmployee.setEmployeeId("EMP004");
+                regularEmployee.setFirstName("John");
+                regularEmployee.setLastName("Doe");
+                regularEmployee.setEmail("employee@worksphere.com");
+                regularEmployee.setContact("+1234567893");
+                regularEmployee.setAddress("321 Employee Lane");
+                regularEmployee.setCity("Employee City");
+                regularEmployee.setBloodGroup("AB+");
+                regularEmployee.setSkills("Java, Spring Boot, React");
+                regularEmployee.setExperience(3);
+                regularEmployee.setEducation("Bachelor's in Computer Science");
+                regularEmployee.setDateOfJoining(LocalDate.now());
+                regularEmployee.setManager(managerEmployee);
+                employeeRepository.save(regularEmployee);
+            }
+        }
+    }
+
+    private void initializeProjects() {
+        if (projectRepository.count() == 0) {
+            Employee managerEmployee = employeeRepository.findByEmployeeId("EMP003").orElse(null);
+            Employee regularEmployee = employeeRepository.findByEmployeeId("EMP004").orElse(null);
+
+            // Project 1
+            Project project1 = new Project();
+            project1.setName("WorkSphere EMS");
+            project1.setDescription("Employee Management System for WorkSphere");
+            project1.setProjectCode("PRJ001");
+            project1.setStatus(Project.ProjectStatus.ACTIVE);
+            project1.setStartDate(LocalDate.now());
+            project1.setEndDate(LocalDate.now().plusMonths(6));
+            project1.setManager(managerEmployee);
+            project1.getEmployees().add(regularEmployee);
+            projectRepository.save(project1);
+
+            // Project 2
+            Project project2 = new Project();
+            project2.setName("E-Commerce Platform");
+            project2.setDescription("Online shopping platform development");
+            project2.setProjectCode("PRJ002");
+            project2.setStatus(Project.ProjectStatus.ACTIVE);
+            project2.setStartDate(LocalDate.now().minusMonths(1));
+            project2.setEndDate(LocalDate.now().plusMonths(5));
+            project2.setManager(managerEmployee);
+            project2.getEmployees().add(regularEmployee);
+            projectRepository.save(project2);
+        }
+    }
+} 
