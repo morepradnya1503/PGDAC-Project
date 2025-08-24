@@ -1,0 +1,14 @@
+# Ignore IDE and system files
+.metadata/
+.settings/
+.classpath
+.project
+*.iml
+*.log
+*.tmp
+node_modules/
+target/
+build/
+.DS_Store
+Thumbs.db
+.env
